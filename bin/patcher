@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+# author: Patrick Münch
+# author: Christoph Hartmann
+# author: Dominik Richter
+
+require 'json'
+require 'thor'
+require 'terminal-table'
+require 'yaml'
+require_relative '../lib/inspec'
+
+class PatcherCLI < Thor
+
+  desc "extract REPORT", "loads available patches from InSpec report"
+  option :format, :type => :string, :default => 'cli'
+  option :output, :type => :string
+  def extract(filename)
+
+    inspec_report = load_report(filename)
+
+    ip = Patcher::InSpecProfile.new
+    package_list = ip.scan_report(inspec_report)
+
+    case options[:format]
+    when 'cli'
+      puts "Load #{filename}"
+      puts display(package_list)
+    when 'json'
+      puts package_list.to_json
+    when 'yaml'
+      puts package_list.to_yaml
+    end
+
+    # write json content to file
+    if options[:output]
+      write_patchlist(options[:output], package_list.to_json)
+    end
+  end
+
+  private
+
+  # load inspec profile
+  def load_report(filename)
+    inspec_report = JSON.parse(File.read(filename))
+  end
+
+  # write to patchlist.json
+  def write_patchlist(filename, package_list)
+    File.open(filename,"w") do |f|
+      f.write(package_list.to_json)
+    end
+  end
+
+  def display(package_list)
+    rows = []
+    package_list.each { |pkg|
+      rows << [pkg['name'], pkg['version']]
+    }
+    table = Terminal::Table.new :rows => rows, :headings => ['Package', 'Version']
+  end
+end
+
+PatcherCLI.start(ARGV)

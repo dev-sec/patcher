@@ -34,7 +34,7 @@ class PatcherCLI < Thor
 
     # write json content to file
     if options[:output]
-      write_patchlist(options[:output], package_list.to_json)
+      write_patchlist(options[:output], package_list)
     end
   end
 
@@ -48,7 +48,7 @@ class PatcherCLI < Thor
   # write to patchlist.json
   def write_patchlist(filename, package_list)
     File.open(filename,"w") do |f|
-      f.write(package_list.to_json)
+      f.write(JSON.pretty_generate(package_list))
     end
   end
 

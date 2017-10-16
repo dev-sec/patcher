@@ -4,8 +4,8 @@
 
 The idea behind this tool is to define a workflow for patching systems. This workflow consists of 3 steps:
 
- * Scan a system with InSpec
- * Approve the patches
+ * Scan a system with InSpec Patch Baseline
+ * Approve the patches and generate a patch policy
  * Apply those with any configuration management tool
 
 At this point, the workflow is supported with
@@ -54,7 +54,7 @@ Load examples/ubuntu-16.04_default_inspec.json
 inspec exec ./ -t ssh://ubuntu@<dns-name> --key-files=<keyfile> --sudo --format=json > ubuntu-16.04-inspec.json
 
 # extract patch
-patcher extract ubuntu-16.04-inspec.json --format json -o chef-update-linux/data_bags/packagelist/update.json
+patcher extract ubuntu-16.04-inspec.json --format json --output chef-update-linux/data_bags/packagelist/update.json
 
 # run chef-update-linux cookbook
 chef-client

@@ -4,6 +4,8 @@
 # author: Christoph Hartmann
 # author: Dominik Richter
 
+require 'version'
+
 module Patcher
   class InSpecProfile
     def supported_profile(name)
@@ -26,7 +28,15 @@ module Patcher
       packagelist
     end
 
-    def scan_report(report)
+    def patch_profile(report)
+      patch_profile = {
+        'generator' => {
+          'name' => 'patcher',
+          'version' => Patcher::VERSION
+        },
+        'packages' => []
+      }
+
       profiles = report['profiles']
       packagelist = []
       if !profiles.nil? && !profiles.empty?
@@ -44,11 +54,9 @@ module Patcher
         # sort package list
         packagelist.sort! { |x,y| x['name'] <=> y['name'] }
 
-        return packagelist
-      else
-        # puts "InSpec report is empty"
-        return []
+        patch_profile['packages'] = packagelist
       end
+      patch_profile
     end
   end
 end

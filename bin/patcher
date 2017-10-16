@@ -12,29 +12,31 @@ require_relative '../lib/inspec'
 
 class PatcherCLI < Thor
 
-  desc "extract REPORT", "loads available patches from InSpec report"
+  desc "extract REPORT", "scans an InSpec report and extracts the patches"
   option :format, :type => :string, :default => 'cli'
-  option :output, :type => :string
+  option :output, :type => :string, :aliases => 'o'
   def extract(filename)
-
     inspec_report = load_report(filename)
 
     ip = Patcher::InSpecProfile.new
-    package_list = ip.scan_report(inspec_report)
+    patch_profile = ip.patch_profile(inspec_report)
 
     case options[:format]
-    when 'cli'
-      puts "Load #{filename}"
-      puts display(package_list)
-    when 'json'
-      puts package_list.to_json
     when 'yaml'
-      puts package_list.to_yaml
+      data = patch_profile.to_yaml
+    when 'json'
+      data = JSON.pretty_generate(patch_profile)
+    else
+      data = display(patch_profile['packages'])
     end
 
     # write json content to file
     if options[:output]
-      write_patchlist(options[:output], package_list)
+      write_file(options[:output], data)
+    # otherwise show the content in CLI
+    else
+      puts "Extracted patches from #{filename}"
+      puts data
     end
   end
 
@@ -46,9 +48,9 @@ class PatcherCLI < Thor
   end
 
   # write to patchlist.json
-  def write_patchlist(filename, package_list)
+  def write_file(filename, content)
     File.open(filename,"w") do |f|
-      f.write(JSON.pretty_generate(package_list))
+      f.write(content)
     end
   end
 

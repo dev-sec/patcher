@@ -1,5 +1,7 @@
 # Patcher
 
+This project is DEPRECATED and NO LONGER SUPPORTED. If you think this should really be supported, [reach out](https://dev-sec.io/community/) and we can discuss options.
+
 ## Description
 
 The idea behind this tool is to define a workflow for patching systems. This workflow consists of 3 steps:
